@@ -124,7 +124,7 @@ public class AdapterTests
     [Fact]
     public void Jofogas_parses_next_data()
     {
-        var html = NextData($$"""{"props": {"pageProps": {"adList": {"ads": [{{JofogasAd}}], "pager": {"last_page": 12}}}}}""");
+        var html = NextData("""{"props": {"pageProps": {"adList": {"ads": [""" + JofogasAd + """], "pager": {"last_page": 12}}}}}""");
         var (ads, pager) = JofogasAdapter.ParsePage(html);
         Assert.Equal(12, pager.P("last_page").Num());
         var r = JofogasAdapter.ParseAd(ads[0])!;
@@ -164,7 +164,7 @@ public class AdapterTests
              "pet": null, "furnished": null,
              "mainPicture": {"id": 1, "variants": {"1": {"url": "https://pic01.ingatlannet.hu/ingatlan//2026/11/7/6936446-1.jpg"}}}}
             """;
-        var e = Assert.Single(IngatlannetAdapter.ParsePage(NextData($$"""{"props": {"pageProps": {"serverEstates": [{{estate}}]}}}""")));
+        var e = Assert.Single(IngatlannetAdapter.ParsePage(NextData("""{"props": {"pageProps": {"serverEstates": [""" + estate + """]}}}""")));
         var r = IngatlannetAdapter.ParseEstate(e)!;
         Assert.Equal("6936446", r.ExternalId);
         Assert.Equal(550000, r.Price);
@@ -269,7 +269,7 @@ public class AdapterTests
                               {"id": "bucuresti/sectorul-3", "locationLevel": "sector", "name": "Sectorul 3"}]}}}
             """;
         var (items, pagination) = StoriaAdapter.ParsePage(NextData(
-            $$"""{"props": {"pageProps": {"data": {"searchAds": {"items": [{{item}}], "pagination": {"totalPages": 381, "currentPage": 1}}}}}}"""));
+            """{"props": {"pageProps": {"data": {"searchAds": {"items": [""" + item + """], "pagination": {"totalPages": 381, "currentPage": 1}}}}}}"""));
         Assert.Equal(381, pagination.P("totalPages").Num());
         var r = StoriaAdapter.ParseItem(items[0])!;
         Assert.Equal(799, r.Price);
