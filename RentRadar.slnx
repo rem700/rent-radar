@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RentRadar.Api/RentRadar.Api.csproj" />
+    <Project Path="src/RentRadar.Contracts/RentRadar.Contracts.csproj" />
+    <Project Path="src/RentRadar.Domain/RentRadar.Domain.csproj" />
+    <Project Path="src/RentRadar.Scraping/RentRadar.Scraping.csproj" />
+    <Project Path="src/RentRadar.ServiceDefaults/RentRadar.ServiceDefaults.csproj" />
+    <Project Path="src/RentRadar.Worker/RentRadar.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RentRadar.Tests/RentRadar.Tests.csproj" />
+  </Folder>
+</Solution>

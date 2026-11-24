@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>rent-radar</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RentRadar.Scraping\RentRadar.Scraping.csproj" />
+    <ProjectReference Include="..\RentRadar.ServiceDefaults\RentRadar.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

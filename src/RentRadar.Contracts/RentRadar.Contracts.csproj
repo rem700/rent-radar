@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Messages exchanged between the API and the scraper workers. No dependencies. -->
+</Project>

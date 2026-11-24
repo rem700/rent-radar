@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dotnet:
+    name: .NET build & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore RentRadar.slnx
+      - run: dotnet build RentRadar.slnx -c Release --no-restore
+      - run: dotnet test RentRadar.slnx -c Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
+      - name: Report failed tests as annotations
+        if: failure()
+        run: |
+          python3 - <<'EOF'
+          import glob, xml.etree.ElementTree as ET
+          ns = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
+          for f in glob.glob("TestResults/*.trx"):
+              for r in ET.parse(f).getroot().iterfind(".//t:UnitTestResult", ns):
+                  if r.get("outcome") == "Failed":
+                      msg = (r.findtext(".//t:Message", "", ns) or "")[:900].replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+                      print(f"::error title={r.get('testName')}::{msg}")
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults
+
+  web:
+    name: React build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  compose:
+    name: docker compose smoke test
+    needs: [dotnet, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build
+      - run: bash scripts/smoke-test.sh
+      - name: Service logs
+        if: failure()
+        run: |
+          docker compose ps
+          for s in api worker-hu web; do
+            docker compose logs --tail 40 "$s" | tail -c 900 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g' | sed "s/^/::error title=$s logs::/"
+          done
+      - if: always()
+        run: docker compose down -v

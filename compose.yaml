@@ -1,0 +1,100 @@
+# Distributed mode: docker compose up --build  →  http://localhost:8080
+# API http://localhost:8000/openapi/v1.json · RabbitMQ http://localhost:15672 (guest/guest) · telemetry http://localhost:18888
+name: rent-radar
+
+x-dotnet: &dotnet
+  restart: unless-stopped
+  environment: &dotnet-env
+    Messaging__Transport: RabbitMq
+    Messaging__Host: rabbitmq
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rentradar
+      POSTGRES_PASSWORD: rentradar
+      POSTGRES_DB: rentradar
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rentradar"]
+      interval: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports: ["15672:15672"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports: ["18888:18888"]
+
+  api:
+    <<: *dotnet
+    build: { context: ., args: { PROJECT: RentRadar.Api } }
+    environment:
+      <<: *dotnet-env
+      Database__Provider: Postgres
+      ConnectionStrings__postgres: Host=postgres;Database=rentradar;Username=rentradar;Password=rentradar
+      ConnectionStrings__redis: redis:6379
+      Workers__InProcess: "false"
+    ports: ["8000:8080"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # one worker per country; each listens only to the queues of its sources
+  worker-hu:
+    <<: *dotnet
+    build: { context: ., args: { PROJECT: RentRadar.Worker } }
+    environment:
+      <<: *dotnet-env
+      Worker__Sources: jofogas,ingatlannet,alberlet,ingatlan,demo
+      # optional, for the ingatlan.com e-mail alerts — put them in a git-ignored .env file
+      Mail__User: ${GMAIL_USER:-}
+      Mail__AppPassword: ${GMAIL_APP_PASSWORD:-}
+      Mail__Label: ${GMAIL_LABEL:-rent-finder}
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+
+  worker-ro:
+    <<: *dotnet
+    build: { context: ., args: { PROJECT: RentRadar.Worker } }
+    environment:
+      <<: *dotnet-env
+      Worker__Sources: storia,olx_ro
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+
+  worker-sk:
+    <<: *dotnet
+    build: { context: ., args: { PROJECT: RentRadar.Worker } }
+    environment:
+      <<: *dotnet-env
+      Worker__Sources: nehnutelnosti
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    ports: ["8080:80"]
+    depends_on: [api]
+
+volumes:
+  pgdata:

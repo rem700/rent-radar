@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RentRadar.Domain\RentRadar.Domain.csproj" />
+    <ProjectReference Include="..\RentRadar.Contracts\RentRadar.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RentRadar.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,45 @@
+html, body, #root { height: 100%; margin: 0; }
+body { background: #EEF1EE; color: #27302B; -webkit-font-smoothing: antialiased; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* панель списка — один белый лист, строки через тонкие линии */
+.sheet { background: #fff; border-radius: 12px; border: 1px solid #DDE3DE; overflow: hidden; }
+.row { display: grid; grid-template-columns: 112px 1fr auto; gap: 14px; padding: 14px 16px; border-bottom: 1px solid #E8ECE9; cursor: pointer; transition: background .15s; }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: #F6F8F6; }
+.row.selected { background: #E3ECE7; }
+.row.dim { opacity: .5; }
+.row-img { width: 112px; height: 84px; border-radius: 8px; object-fit: cover; background: #E8ECE9; display: block; }
+.row-img.empty { display: flex; align-items: center; justify-content: center; color: #9AA39D; font-size: 12px; }
+.row-price { font-size: 18px; font-weight: 600; line-height: 1.2; }
+.row-local { color: #6D7872; font-size: 13px; margin-left: 8px; font-weight: 400; }
+.row-facts { color: #27302B; margin-top: 2px; }
+.row-addr { color: #6D7872; font-size: 13px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-meta { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #8D978F; }
+.row-meta a { color: #6D7872; }
+.row-meta a:hover { color: #3F6F5E; }
+.row-new { color: #3F6F5E; font-weight: 500; }
+.row-actions { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.icon-btn { border: 0; background: transparent; width: 32px; height: 32px; border-radius: 8px; color: #8D978F; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; }
+.icon-btn:hover { background: #EEF1EE; color: #27302B; }
+.icon-btn:focus-visible { outline: 2px solid #3F6F5E; outline-offset: 1px; }
+.icon-btn.on { color: #B8912F; }
+
+.map-wrap { height: 100%; min-height: 420px; border-radius: 12px; overflow: hidden; border: 1px solid #DDE3DE; }
+.leaflet-container { height: 100%; width: 100%; font-family: inherit; background: #EEF1EE; }
+/* обычная карта OSM, приглушённая под спокойную палитру */
+.calm-tiles { filter: grayscale(.85) sepia(.12) brightness(1.04) contrast(.92); }
+.leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 6px 24px rgba(39,48,43,.12); }
+
+.side-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.side-count { color: #8D978F; font-size: 12px; font-variant-numeric: tabular-nums; }
+.side-new { background: #3F6F5E; color: #fff; border-radius: 10px; padding: 0 7px; font-size: 12px; line-height: 18px; }
+
+.source-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+@media (max-width: 640px) {
+  .row { grid-template-columns: 84px 1fr; }
+  .row-img { width: 84px; height: 64px; }
+  .row-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) { .row { transition: none; } }
